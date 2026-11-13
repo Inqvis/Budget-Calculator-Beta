@@ -1,0 +1,52 @@
+@page {
+  margin: 1.5cm;
+}
+
+body {
+  background: #ffffff;
+  color: #000000;
+  font-size: 11pt;
+}
+
+.no-print,
+.site-header {
+  display: none !important;
+}
+
+.print-only {
+  display: block;
+}
+
+.print-header {
+  border-bottom: 2px solid #000000;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+}
+
+.print-header h2 {
+  margin: 0 0 0.2rem;
+  font-size: 15pt;
+}
+
+.print-header p {
+  margin: 0;
+  font-size: 9.5pt;
+  color: #333333;
+}
+
+.layout-grid {
+  display: block;
+  padding: 0;
+}
+
+.card,
+.alert-banner {
+  break-inside: avoid;
+  border-color: #000000;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.summary-cards {
+  grid-template-columns: repeat(3, 1fr);
+}
