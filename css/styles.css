@@ -181,8 +181,8 @@ h2 {
   border: 0;
 }
 
-.field label,
-.field legend {
+.field > label:not(.checkbox-label),
+.field > legend {
   display: block;
   font-size: 0.84rem;
   font-weight: 500;
@@ -233,7 +233,7 @@ input[aria-invalid="true"] {
 .radio-options {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
+  gap: 0.8rem;
 }
 
 .radio-pill {
