@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Budget Calculator — Presupuesto Mensual CLP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="css/print.css" media="print" />
     <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
@@ -14,6 +20,8 @@
     <script defer src="js/app.js"></script>
   </head>
   <body>
+    <div class="ambient-light no-print" aria-hidden="true"></div>
+    <div class="perspective-grid no-print" aria-hidden="true"></div>
     <header class="site-header">
       <div class="container header-inner">
         <div>
@@ -21,14 +29,6 @@
           <p class="subtitle">
             Presupuesto mensual en Pesos Chilenos (CLP) · Guardado solo en tu navegador
           </p>
-        </div>
-        <div class="header-actions no-print">
-          <button type="button" id="btn-print" class="btn btn-primary">
-            Descargar Resumen en PDF
-          </button>
-          <button type="button" id="btn-clear" class="btn btn-secondary">
-            Limpiar todo
-          </button>
         </div>
       </div>
     </header>
@@ -38,198 +38,291 @@
       <p id="print-date"></p>
     </section>
 
-    <main class="container layout-grid">
-      <section class="forms-column no-print" aria-label="Registro de movimientos">
-        <article class="card">
-          <h2>Agregar Ingreso</h2>
-          <form id="income-form" novalidate>
-            <div class="field">
-              <label for="income-desc">Descripción</label>
-              <input
-                id="income-desc"
-                name="descripcion"
-                type="text"
-                maxlength="60"
-                placeholder="Ej: Sueldo líquido, Freelance, Beca"
-                required
-              />
-              <p class="field-error" id="income-desc-error" role="alert"></p>
-            </div>
-            <div class="field">
-              <label for="income-amount">Monto (CLP)</label>
-              <input
-                id="income-amount"
-                name="monto"
-                type="text"
-                inputmode="numeric"
-                placeholder="Ej: 450000"
-                required
-              />
-              <p class="field-error" id="income-amount-error" role="alert"></p>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block">
-              + Agregar ingreso
-            </button>
-          </form>
-        </article>
-
-        <article class="card">
-          <h2>Agregar Gasto</h2>
-          <form id="expense-form" novalidate>
-            <div class="field">
-              <label for="expense-desc">Descripción</label>
-              <input
-                id="expense-desc"
-                name="descripcion"
-                type="text"
-                maxlength="60"
-                placeholder="Ej: Arriendo, Internet, Café diario"
-                required
-              />
-              <p class="field-error" id="expense-desc-error" role="alert"></p>
-            </div>
-            <div class="field">
-              <label for="expense-amount">Monto (CLP)</label>
-              <input
-                id="expense-amount"
-                name="monto"
-                type="text"
-                inputmode="numeric"
-                placeholder="Ej: 25000"
-                required
-              />
-              <p class="field-error" id="expense-amount-error" role="alert"></p>
-            </div>
-            <fieldset class="field radio-group">
-              <legend>Tipo de gasto</legend>
-              <div class="radio-options">
-                <label class="radio-pill">
-                  <input type="radio" name="tipo" value="fijo" checked />
-                  <span>Fijo</span>
-                </label>
-                <label class="radio-pill">
-                  <input type="radio" name="tipo" value="variable" />
-                  <span>Variable</span>
-                </label>
-              </div>
-              <p class="field-error" id="expense-type-error" role="alert"></p>
-            </fieldset>
-            <div class="field checkbox-field">
-              <label class="checkbox-label">
-                <input type="checkbox" id="expense-hormiga" name="es_hormiga" />
-                <span>
-                  <strong>Gasto Hormiga</strong>
-                  <small>Pequeños consumos cotidianos o impulsivos (café, snacks, delivery).</small>
-                </span>
-              </label>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block">
-              + Agregar gasto
-            </button>
-          </form>
+    <main class="container main-content" id="app-main">
+      <section class="step-panel" data-step="1" aria-label="Inicio">
+        <article class="card step-card hero-card">
+          <h2>Bienvenido a Budget Calculator</h2>
+          <p class="step-lead">
+            Organiza tu presupuesto mensual en Pesos Chilenos: registra tus ingresos,
+            selecciona tus categorías, revisa tus gastos y capacidad de ahorro, y descarga tu resumen en PDF.
+          </p>
+          <div class="step-actions">
+            <button type="button" id="btn-start" class="btn btn-primary">Empezar</button>
+          </div>
         </article>
       </section>
 
-      <section class="results-column" aria-label="Resumen y detalle del presupuesto">
-        <div class="summary-cards">
-          <article class="card metric-card">
-            <span class="metric-label">Total Ingresos</span>
-            <strong class="metric-value" id="total-ingresos">$0</strong>
-            <span class="metric-sub" id="ingresos-count">0 registros</span>
-          </article>
+      <section class="step-panel" data-step="2" aria-label="Insertar ingreso" hidden>
+        <div class="layout-grid">
+          <div class="forms-column no-print">
+            <article class="card">
+              <h2>Agregar Ingreso</h2>
+              <form id="income-form" novalidate>
+                <div class="field">
+                  <label for="income-desc">Descripción</label>
+                  <input
+                    id="income-desc"
+                    name="descripcion"
+                    type="text"
+                    maxlength="60"
+                    placeholder="Ej: Sueldo líquido, Freelance, Beca"
+                    required
+                  />
+                  <p class="field-error" id="income-desc-error" role="alert"></p>
+                </div>
+                <div class="field">
+                  <label for="income-amount">Monto (CLP)</label>
+                  <input
+                    id="income-amount"
+                    name="monto"
+                    type="text"
+                    inputmode="numeric"
+                    placeholder="Ej: 450000"
+                    required
+                  />
+                  <p class="field-error" id="income-amount-error" role="alert"></p>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                  + Agregar ingreso
+                </button>
+              </form>
+            </article>
+          </div>
 
-          <article class="card metric-card">
-            <span class="metric-label">Total Gastos</span>
-            <strong class="metric-value" id="total-gastos">$0</strong>
-            <span class="metric-sub" id="gastos-breakdown">Fijos: $0 · Variables: $0</span>
-          </article>
-
-          <article class="card metric-card balance-card" id="balance-card" data-state="equilibrado">
-            <span class="metric-label">Balance Proyectado</span>
-            <strong class="metric-value" id="balance-neto">$0</strong>
-            <span class="metric-sub" id="estado-label">Presupuesto equilibrado</span>
-          </article>
+          <div class="results-column">
+            <article class="card list-card">
+              <div class="list-header">
+                <h2>Ingresos Registrados</h2>
+                <span class="list-total" id="step2-total-ingresos">$0</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Descripción</th>
+                      <th class="col-amount">Monto</th>
+                      <th class="col-action no-print">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody id="step2-income-list"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
         </div>
+        <div class="step-nav no-print">
+          <button type="button" class="btn btn-secondary" data-step-go="1">← Inicio</button>
+          <button type="button" class="btn btn-primary" data-step-go="3">Continuar a categorías y gastos</button>
+        </div>
+      </section>
 
-        <div id="overdraft-alert" class="alert-banner alert-deficit" role="status" hidden></div>
-        <div id="hormiga-alert" class="alert-banner alert-hormiga" role="status" hidden></div>
+      <section class="step-panel" data-step="3" aria-label="Selección de categorías y detalle de gastos" hidden>
+        <div class="layout-grid">
+          <section class="forms-column no-print" aria-label="Categorías y registro de gastos">
+            <article class="card">
+              <h2>Selección de Categorías</h2>
+              <div class="placeholder-box">
+                <p class="placeholder-title">Categorías y sub-categorías (Placeholder)</p>
+                <p class="placeholder-text">
+                  Categorías seleccionadas → Sub-categorías seleccionadas → Gasto en categorías o sub-categorías.
+                  Mientras defines tus categorías, puedes agregar gastos abajo.
+                </p>
+              </div>
+            </article>
 
-        <article class="card savings-card">
-          <div class="savings-header">
-            <h2>Capacidad de Ahorro</h2>
-            <span class="savings-percent" id="ahorro-porcentaje">0% del ingreso</span>
-          </div>
-          <p class="savings-amount" id="ahorro-monto">$0</p>
-          <p class="savings-note" id="ahorro-nota">
-            Ingresa tus ingresos y gastos para calcular tu monto máximo ahorrable.
-          </p>
-        </article>
+            <article class="card">
+              <h2>Agregar Gasto</h2>
+              <form id="expense-form" novalidate>
+                <div class="field">
+                  <label for="expense-desc">Descripción</label>
+                  <input
+                    id="expense-desc"
+                    name="descripcion"
+                    type="text"
+                    maxlength="60"
+                    placeholder="Ej: Arriendo, Internet, Café diario"
+                    required
+                  />
+                  <p class="field-error" id="expense-desc-error" role="alert"></p>
+                </div>
+                <div class="field">
+                  <label for="expense-amount">Monto (CLP)</label>
+                  <input
+                    id="expense-amount"
+                    name="monto"
+                    type="text"
+                    inputmode="numeric"
+                    placeholder="Ej: 25000"
+                    required
+                  />
+                  <p class="field-error" id="expense-amount-error" role="alert"></p>
+                </div>
+                <fieldset class="field radio-group">
+                  <legend>Tipo de gasto</legend>
+                  <div class="radio-options">
+                    <label class="radio-pill">
+                      <input type="radio" name="tipo" value="fijo" checked />
+                      <span>Fijo</span>
+                    </label>
+                    <label class="radio-pill">
+                      <input type="radio" name="tipo" value="variable" />
+                      <span>Variable</span>
+                    </label>
+                  </div>
+                  <p class="field-error" id="expense-type-error" role="alert"></p>
+                </fieldset>
+                <div class="field checkbox-field">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="expense-hormiga" name="es_hormiga" />
+                    <span>
+                      <strong>Gasto Hormiga</strong>
+                      <small>Pequeños consumos cotidianos o impulsivos (café, snacks, delivery).</small>
+                    </span>
+                  </label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                  + Agregar gasto
+                </button>
+              </form>
+            </article>
+          </section>
 
-        <article class="card chart-card">
-          <h2>Distribución del Presupuesto</h2>
-          <div
-            class="bar-track"
-            role="img"
-            aria-label="Comparación entre gastos fijos, gastos variables y saldo disponible"
-          >
-            <div class="bar-segment bar-fijos" id="bar-fijos" style="width: 0%"></div>
-            <div class="bar-segment bar-variables" id="bar-variables" style="width: 0%"></div>
-            <div class="bar-segment bar-saldo" id="bar-saldo" style="width: 0%"></div>
+          <div class="results-column">
+            <article class="card list-card">
+              <div class="list-header">
+                <h2>Gastos Registrados</h2>
+                <span class="list-total" id="step3-total-gastos">$0</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Descripción</th>
+                      <th>Clasificación</th>
+                      <th class="col-amount">Monto</th>
+                      <th class="col-action no-print">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody id="step3-expense-list"></tbody>
+                </table>
+              </div>
+            </article>
           </div>
-          <ul class="bar-legend">
-            <li>
-              <span class="swatch swatch-fijos"></span>
-              <span>Gastos Fijos: <strong id="legend-fijos">$0 (0%)</strong></span>
-            </li>
-            <li>
-              <span class="swatch swatch-variables"></span>
-              <span>Gastos Variables: <strong id="legend-variables">$0 (0%)</strong></span>
-            </li>
-            <li>
-              <span class="swatch swatch-saldo"></span>
-              <span>Saldo Disponible: <strong id="legend-saldo">$0 (0%)</strong></span>
-            </li>
-          </ul>
-        </article>
+        </div>
+        <div class="step-nav no-print">
+          <button type="button" class="btn btn-secondary" data-step-go="2">← Ingresos</button>
+          <button type="button" class="btn btn-primary" data-step-go="4">Ver resultado</button>
+        </div>
+      </section>
 
-        <article class="card list-card">
-          <div class="list-header">
-            <h2>Ingresos Registrados</h2>
-            <span class="list-total" id="list-total-ingresos">$0</span>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Descripción</th>
-                  <th class="col-amount">Monto</th>
-                  <th class="col-action no-print">Acción</th>
-                </tr>
-              </thead>
-              <tbody id="income-list"></tbody>
-            </table>
-          </div>
-        </article>
+      <section class="step-panel" data-step="4" aria-label="Vista de gastos, ingresos y capacidad de ahorro" hidden>
+        <section class="results-column step-results" aria-label="Resumen y detalle del presupuesto">
+            <div class="summary-cards">
+              <article class="card metric-card">
+                <span class="metric-label">Total Ingresos</span>
+                <strong class="metric-value" id="total-ingresos">$0</strong>
+                <span class="metric-sub" id="ingresos-count">0 registros</span>
+              </article>
 
-        <article class="card list-card">
-          <div class="list-header">
-            <h2>Gastos Registrados</h2>
-            <span class="list-total" id="list-total-gastos">$0</span>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Descripción</th>
-                  <th>Clasificación</th>
-                  <th class="col-amount">Monto</th>
-                  <th class="col-action no-print">Acción</th>
-                </tr>
-              </thead>
-              <tbody id="expense-list"></tbody>
-            </table>
-          </div>
-        </article>
+              <article class="card metric-card">
+                <span class="metric-label">Total Gastos</span>
+                <strong class="metric-value" id="total-gastos">$0</strong>
+                <span class="metric-sub" id="gastos-breakdown">Fijos: $0 · Variables: $0</span>
+              </article>
+
+              <article class="card metric-card balance-card" id="balance-card" data-state="equilibrado">
+                <span class="metric-label">Balance Proyectado</span>
+                <strong class="metric-value" id="balance-neto">$0</strong>
+                <span class="metric-sub" id="estado-label">Presupuesto equilibrado</span>
+              </article>
+            </div>
+
+            <div id="overdraft-alert" class="alert-banner alert-deficit" role="status" hidden></div>
+            <div id="hormiga-alert" class="alert-banner alert-hormiga" role="status" hidden></div>
+
+            <article class="card savings-card">
+              <div class="savings-header">
+                <h2>Capacidad de Ahorro</h2>
+                <span class="savings-percent" id="ahorro-porcentaje">0% del ingreso</span>
+              </div>
+              <p class="savings-amount" id="ahorro-monto">$0</p>
+              <p class="savings-note" id="ahorro-nota">
+                Ingresa tus ingresos y gastos para calcular tu monto máximo ahorrable.
+              </p>
+            </article>
+
+            <article class="card chart-card">
+              <h2>Distribución del Presupuesto</h2>
+              <div
+                class="bar-track"
+                role="img"
+                aria-label="Comparación entre gastos fijos, gastos variables y saldo disponible"
+              >
+                <div class="bar-segment bar-fijos" id="bar-fijos" style="width: 0%"></div>
+                <div class="bar-segment bar-variables" id="bar-variables" style="width: 0%"></div>
+                <div class="bar-segment bar-saldo" id="bar-saldo" style="width: 0%"></div>
+              </div>
+              <ul class="bar-legend">
+                <li>
+                  <span class="swatch swatch-fijos"></span>
+                  <span>Gastos Fijos: <strong id="legend-fijos">$0 (0%)</strong></span>
+                </li>
+                <li>
+                  <span class="swatch swatch-variables"></span>
+                  <span>Gastos Variables: <strong id="legend-variables">$0 (0%)</strong></span>
+                </li>
+                <li>
+                  <span class="swatch swatch-saldo"></span>
+                  <span>Saldo Disponible: <strong id="legend-saldo">$0 (0%)</strong></span>
+                </li>
+              </ul>
+            </article>
+
+            <article class="card list-card">
+              <div class="list-header">
+                <h2>Ingresos Registrados</h2>
+                <span class="list-total" id="list-total-ingresos">$0</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Descripción</th>
+                      <th class="col-amount">Monto</th>
+                      <th class="col-action no-print">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody id="income-list"></tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="card list-card">
+              <div class="list-header">
+                <h2>Gastos Registrados</h2>
+                <span class="list-total" id="list-total-gastos">$0</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Descripción</th>
+                      <th>Clasificación</th>
+                      <th class="col-amount">Monto</th>
+                      <th class="col-action no-print">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody id="expense-list"></tbody>
+                </table>
+              </div>
+            </article>
+            <div class="step-nav no-print">
+              <button type="button" class="btn btn-secondary" data-step-go="3">← Categorías y gastos</button>
+              <button type="button" id="btn-print" class="btn btn-primary">
+                Descargar Resumen en PDF
+              </button>
+            </div>
+          </section>
       </section>
     </main>
   </body>

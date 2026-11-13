@@ -8,11 +8,17 @@
   var state = store.loadBudget();
 
   var els = {
+    appMain: document.getElementById("app-main"),
+    btnStart: document.getElementById("btn-start"),
+    stepPanels: document.querySelectorAll(".step-panel"),
+
     incomeForm: document.getElementById("income-form"),
     incomeDesc: document.getElementById("income-desc"),
     incomeAmount: document.getElementById("income-amount"),
     incomeDescErr: document.getElementById("income-desc-error"),
     incomeAmountErr: document.getElementById("income-amount-error"),
+    step2IncomeList: document.getElementById("step2-income-list"),
+    step2TotalIngresos: document.getElementById("step2-total-ingresos"),
 
     expenseForm: document.getElementById("expense-form"),
     expenseDesc: document.getElementById("expense-desc"),
@@ -21,6 +27,8 @@
     expenseDescErr: document.getElementById("expense-desc-error"),
     expenseAmountErr: document.getElementById("expense-amount-error"),
     expenseTypeErr: document.getElementById("expense-type-error"),
+    step3ExpenseList: document.getElementById("step3-expense-list"),
+    step3TotalGastos: document.getElementById("step3-total-gastos"),
 
     totalIngresos: document.getElementById("total-ingresos"),
     ingresosCount: document.getElementById("ingresos-count"),
@@ -50,9 +58,17 @@
     listTotalGastos: document.getElementById("list-total-gastos"),
 
     btnPrint: document.getElementById("btn-print"),
-    btnClear: document.getElementById("btn-clear"),
     printDate: document.getElementById("print-date"),
   };
+
+  function setStep(step) {
+    var target = String(step);
+    for (var i = 0; i < els.stepPanels.length; i++) {
+      els.stepPanels[i].hidden = els.stepPanels[i].dataset.step !== target;
+    }
+    if (target === "2") els.incomeDesc.focus();
+    else if (target === "3") els.expenseDesc.focus();
+  }
 
   function makeId() {
     return Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
@@ -187,71 +203,90 @@
       ")";
 
     els.listTotalIngresos.textContent = fmt.formatCLP(summary.total_ingresos);
+    els.step2TotalIngresos.textContent = fmt.formatCLP(summary.total_ingresos);
     els.listTotalGastos.textContent = fmt.formatCLP(summary.total_gastos);
+    els.step3TotalGastos.textContent = fmt.formatCLP(summary.total_gastos);
 
+    function buildIncomeRow(item) {
+      var tr = document.createElement("tr");
+      var tdDesc = document.createElement("td");
+      tdDesc.textContent = item.descripcion;
+
+      var tdAmt = document.createElement("td");
+      tdAmt.className = "col-amount";
+      tdAmt.textContent = fmt.formatCLP(item.monto);
+
+      var tdAct = document.createElement("td");
+      tdAct.className = "col-action no-print";
+      tdAct.appendChild(createDeleteButton("ingreso", item.id, item.descripcion));
+
+      tr.appendChild(tdDesc);
+      tr.appendChild(tdAmt);
+      tr.appendChild(tdAct);
+      return tr;
+    }
+
+    function buildExpenseRow(item) {
+      var tr = document.createElement("tr");
+      var tdDesc = document.createElement("td");
+      tdDesc.textContent = item.descripcion;
+
+      var tdBadges = document.createElement("td");
+      var typeBadge = document.createElement("span");
+      typeBadge.className =
+        "badge " + (item.tipo === "fijo" ? "badge-fijo" : "badge-variable");
+      typeBadge.textContent = item.tipo === "fijo" ? "Fijo" : "Variable";
+      tdBadges.appendChild(typeBadge);
+
+      if (item.es_hormiga) {
+        var antBadge = document.createElement("span");
+        antBadge.className = "badge badge-hormiga";
+        antBadge.textContent = "Hormiga";
+        tdBadges.appendChild(antBadge);
+      }
+
+      var tdAmt = document.createElement("td");
+      tdAmt.className = "col-amount";
+      tdAmt.textContent = fmt.formatCLP(item.monto);
+
+      var tdAct = document.createElement("td");
+      tdAct.className = "col-action no-print";
+      tdAct.appendChild(createDeleteButton("gasto", item.id, item.descripcion));
+
+      tr.appendChild(tdDesc);
+      tr.appendChild(tdBadges);
+      tr.appendChild(tdAmt);
+      tr.appendChild(tdAct);
+      return tr;
+    }
+
+    renderTableRows(
+      els.step2IncomeList,
+      state.ingresos,
+      3,
+      "Aún no has agregado ingresos.",
+      buildIncomeRow
+    );
     renderTableRows(
       els.incomeList,
       state.ingresos,
       3,
       "Aún no has agregado ingresos.",
-      function (item) {
-        var tr = document.createElement("tr");
-        var tdDesc = document.createElement("td");
-        tdDesc.textContent = item.descripcion;
-
-        var tdAmt = document.createElement("td");
-        tdAmt.className = "col-amount";
-        tdAmt.textContent = fmt.formatCLP(item.monto);
-
-        var tdAct = document.createElement("td");
-        tdAct.className = "col-action no-print";
-        tdAct.appendChild(createDeleteButton("ingreso", item.id, item.descripcion));
-
-        tr.appendChild(tdDesc);
-        tr.appendChild(tdAmt);
-        tr.appendChild(tdAct);
-        return tr;
-      }
+      buildIncomeRow
     );
-
+    renderTableRows(
+      els.step3ExpenseList,
+      state.gastos,
+      4,
+      "Aún no has agregado gastos.",
+      buildExpenseRow
+    );
     renderTableRows(
       els.expenseList,
       state.gastos,
       4,
       "Aún no has agregado gastos.",
-      function (item) {
-        var tr = document.createElement("tr");
-        var tdDesc = document.createElement("td");
-        tdDesc.textContent = item.descripcion;
-
-        var tdBadges = document.createElement("td");
-        var typeBadge = document.createElement("span");
-        typeBadge.className =
-          "badge " + (item.tipo === "fijo" ? "badge-fijo" : "badge-variable");
-        typeBadge.textContent = item.tipo === "fijo" ? "Fijo" : "Variable";
-        tdBadges.appendChild(typeBadge);
-
-        if (item.es_hormiga) {
-          var antBadge = document.createElement("span");
-          antBadge.className = "badge badge-hormiga";
-          antBadge.textContent = "Hormiga";
-          tdBadges.appendChild(antBadge);
-        }
-
-        var tdAmt = document.createElement("td");
-        tdAmt.className = "col-amount";
-        tdAmt.textContent = fmt.formatCLP(item.monto);
-
-        var tdAct = document.createElement("td");
-        tdAct.className = "col-action no-print";
-        tdAct.appendChild(createDeleteButton("gasto", item.id, item.descripcion));
-
-        tr.appendChild(tdDesc);
-        tr.appendChild(tdBadges);
-        tr.appendChild(tdAmt);
-        tr.appendChild(tdAct);
-        return tr;
-      }
+      buildExpenseRow
     );
   }
 
@@ -337,19 +372,23 @@
     updateAndRender();
   }
 
-  els.incomeList.addEventListener("click", handleTableDelete);
-  els.expenseList.addEventListener("click", handleTableDelete);
+  els.btnStart.addEventListener("click", function () {
+    setStep(2);
+  });
 
-  els.btnClear.addEventListener("click", function () {
-    if (state.ingresos.length === 0 && state.gastos.length === 0) return;
-    if (!window.confirm("¿Seguro que quieres borrar todos los ingresos y gastos?")) return;
-    state = store.clearBudget();
-    render();
+  els.appMain.addEventListener("click", function (event) {
+    var stepBtn = event.target.closest("[data-step-go]");
+    if (stepBtn) {
+      setStep(stepBtn.dataset.stepGo);
+      return;
+    }
+    handleTableDelete(event);
   });
 
   els.btnPrint.addEventListener("click", function () {
     window.BudgetPDF.download(state, calc.calculateBudget(state.ingresos, state.gastos));
   });
 
+  setStep(1);
   render();
 })();

@@ -15,6 +15,9 @@
 
 body {
   margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background: var(--bg);
   color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -74,8 +77,26 @@ h2 {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.25rem;
+}
+
+.main-content {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   padding-top: 1.25rem;
   padding-bottom: 2.5rem;
+}
+
+.step-panel[data-step="1"] {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 @media (min-width: 900px) {
@@ -500,4 +521,54 @@ th {
 .btn-delete:hover {
   background: var(--ink);
   color: var(--bg);
+}
+
+.step-card {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.hero-card {
+  text-align: center;
+  padding: 2.25rem 1.5rem;
+}
+
+.hero-card .step-actions {
+  justify-content: center;
+}
+
+.step-lead {
+  margin: 0 0 1.25rem;
+  color: var(--muted);
+}
+
+.step-actions,
+.step-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.step-results {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.placeholder-box {
+  background: var(--surface);
+  border: 1px dashed var(--border-strong);
+  padding: 1.25rem 1rem;
+}
+
+.placeholder-title {
+  margin: 0 0 0.35rem;
+  font-weight: 700;
+}
+
+.placeholder-text {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
 }
