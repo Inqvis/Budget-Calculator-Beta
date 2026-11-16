@@ -63,8 +63,17 @@
 
   function setStep(step) {
     var target = String(step);
+    var found = false;
     for (var i = 0; i < els.stepPanels.length; i++) {
-      els.stepPanels[i].hidden = els.stepPanels[i].dataset.step !== target;
+      if (els.stepPanels[i].dataset.step === target) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) return;
+
+    for (var j = 0; j < els.stepPanels.length; j++) {
+      els.stepPanels[j].hidden = els.stepPanels[j].dataset.step !== target;
     }
     if (target === "2") els.incomeDesc.focus();
     else if (target === "3") els.expenseDesc.focus();
@@ -385,10 +394,30 @@
     handleTableDelete(event);
   });
 
+  function updatePrintDate() {
+    if (!els.printDate) return;
+    var now = new Date();
+    els.printDate.textContent =
+      "Fecha de emisión: " +
+      now.toLocaleDateString("es-CL") +
+      " " +
+      now.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  window.addEventListener("beforeprint", updatePrintDate);
+
+  window.addEventListener("storage", function (event) {
+    if (event.key !== store.STORAGE_KEY && event.key !== null) return;
+    state = store.loadBudget();
+    render();
+  });
+
   els.btnPrint.addEventListener("click", function () {
+    if (!window.BudgetPDF) return;
     window.BudgetPDF.download(state, calc.calculateBudget(state.ingresos, state.gastos));
   });
 
   setStep(1);
+  updatePrintDate();
   render();
 })();

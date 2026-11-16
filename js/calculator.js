@@ -1,6 +1,10 @@
 (function (root) {
   "use strict";
 
+  var formatters =
+    root.BudgetFormatters ||
+    (typeof require === "function" ? require("./formatters.js") : null);
+
   function round1(value) {
     return Math.round(value * 10) / 10;
   }
@@ -12,11 +16,8 @@
       errors.description = "Ingresa una descripción entre 2 y 60 caracteres.";
     }
 
-    var raw = String(amount == null ? "" : amount).trim();
-    var parsed = /^(?:\d+|\d{1,3}(?:\.\d{3})+)$/.test(raw)
-      ? Number(raw.replace(/\./g, ""))
-      : NaN;
-    if (!Number.isSafeInteger(parsed) || parsed <= 0) {
+    var parsed = formatters ? formatters.parsePositiveInt(amount) : null;
+    if (parsed === null) {
       errors.amount = "Ingresa un monto entero positivo mayor a $0.";
     }
 
@@ -30,8 +31,16 @@
       valid: Object.keys(errors).length === 0,
       errors: errors,
       description: desc,
-      amount: Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null,
+      amount: parsed,
     };
+  }
+
+  function toValidAmount(item) {
+    if (!item || typeof item !== "object") return 0;
+    var raw = Number(item.monto);
+    if (!Number.isFinite(raw)) return 0;
+    var monto = Math.trunc(raw);
+    return Number.isSafeInteger(monto) && monto > 0 ? monto : 0;
   }
 
   function calculateBudget(ingresos, gastos) {
@@ -40,7 +49,7 @@
 
     var totalIngresos = 0;
     for (var i = 0; i < incomeList.length; i++) {
-      totalIngresos += Math.trunc(Number(incomeList[i].monto) || 0);
+      totalIngresos += toValidAmount(incomeList[i]);
     }
 
     var totalFijos = 0;
@@ -48,11 +57,14 @@
     var totalHormiga = 0;
     for (var j = 0; j < expenseList.length; j++) {
       var g = expenseList[j];
-      var monto = Math.trunc(Number(g.monto) || 0);
+      var monto = toValidAmount(g);
+      if (monto <= 0) continue;
       if (g.tipo === "fijo") {
         totalFijos += monto;
       } else if (g.tipo === "variable") {
         totalVariables += monto;
+      } else {
+        continue;
       }
       if (g.es_hormiga === true) {
         totalHormiga += monto;
