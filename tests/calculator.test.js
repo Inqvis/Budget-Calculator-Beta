@@ -101,6 +101,9 @@ test("validación y formateo CLP", () => {
   assert.equal(formatCLP(0), "$0");
   assert.equal(formatPercent(38.34), "38,3%");
   assert.equal(parsePositiveInt("150.000"), 150000);
+  assert.equal(parsePositiveInt("150,000"), 150000);
+  assert.equal(parsePositiveInt("1,250,000"), 1250000);
+  assert.equal(parsePositiveInt("1.250,000"), null);
   assert.equal(parsePositiveInt("0"), null);
   assert.equal(parsePositiveInt("-500"), null);
   assert.equal(parsePositiveInt("12.5"), null);
@@ -108,6 +111,8 @@ test("validación y formateo CLP", () => {
 
   assert.equal(validateEntry("A", "1000").valid, false);
   assert.equal(validateEntry("Sueldo", "0").valid, false);
+  assert.equal(validateEntry("Sueldo", "450,000").valid, true);
+  assert.equal(validateEntry("Sueldo", "450,000").amount, 450000);
   assert.equal(validateEntry("Café", "2500", { requireType: true, type: "" }).valid, false);
   assert.equal(validateEntry("Café", "2.500", { requireType: true, type: "variable" }).valid, true);
 });

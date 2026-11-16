@@ -304,6 +304,33 @@
     render();
   }
 
+  function formatAmountInput(input) {
+    var raw = input.value;
+    var cursor = input.selectionStart;
+    var digitsBefore = cursor != null ? raw.slice(0, cursor).replace(/\D/g, "").length : null;
+    var digits = raw.replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+    var formatted = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    if (formatted === raw) return;
+    input.value = formatted;
+    if (digitsBefore != null && typeof input.setSelectionRange === "function") {
+      var pos = 0;
+      var seen = 0;
+      while (pos < formatted.length && seen < digitsBefore) {
+        if (/\d/.test(formatted[pos])) seen++;
+        pos++;
+      }
+      input.setSelectionRange(pos, pos);
+    }
+  }
+
+  els.incomeAmount.addEventListener("input", function () {
+    formatAmountInput(els.incomeAmount);
+  });
+
+  els.expenseAmount.addEventListener("input", function () {
+    formatAmountInput(els.expenseAmount);
+  });
+
   els.incomeForm.addEventListener("submit", function (event) {
     event.preventDefault();
     clearErrors([

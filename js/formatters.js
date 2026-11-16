@@ -15,8 +15,8 @@
 
   function parsePositiveInt(raw) {
     var trimmed = String(raw == null ? "" : raw).trim();
-    if (!/^(?:\d+|\d{1,3}(?:\.\d{3})+)$/.test(trimmed)) return null;
-    var value = Number(trimmed.replace(/\./g, ""));
+    if (!/^(?:\d+|\d{1,3}(?:\.\d{3})+|\d{1,3}(?:,\d{3})+)$/.test(trimmed)) return null;
+    var value = Number(trimmed.replace(/[.,]/g, ""));
     if (!Number.isSafeInteger(value) || value <= 0) return null;
     return value;
   }
