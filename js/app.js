@@ -23,6 +23,7 @@
     step2TotalIngresos: document.getElementById("step2-total-ingresos"),
 
     expenseForm: document.getElementById("expense-form"),
+    expenseRadioOptions: document.querySelector("#expense-form .radio-options"),
     expenseDesc: document.getElementById("expense-desc"),
     expenseAmount: document.getElementById("expense-amount"),
     expenseHormiga: document.getElementById("expense-hormiga"),
@@ -63,28 +64,205 @@
     printDate: document.getElementById("print-date"),
   };
 
-  function setStep(step, options) {
-    var target = String(step);
-    var found = false;
+  var STEP_SLIDE_CLASSES = [
+    "slide-enter-forward",
+    "slide-enter-backward",
+    "slide-exit-forward",
+    "slide-exit-backward",
+  ];
+  var currentStep = null;
+  var pendingStep = null;
+  var activeStepTransitionCleanup = null;
+
+  function prefersReducedMotion() {
+    return (
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  }
+
+  function hasActiveAnimation(el, expectedName) {
+    if (!el || typeof el.getAnimations !== "function") return true;
+    var animations = el.getAnimations();
+    for (var i = 0; i < animations.length; i++) {
+      if (animations[i].animationName === expectedName) return true;
+    }
+    return false;
+  }
+
+  function onAnimationComplete(el, expectedName, fallbackMs, callback) {
+    if (!hasActiveAnimation(el, expectedName)) {
+      callback();
+      return null;
+    }
+
+    var done = false;
+    var timer = null;
+
+    function cleanup() {
+      if (timer !== null) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      el.removeEventListener("animationend", handleEvent);
+      el.removeEventListener("animationcancel", handleEvent);
+    }
+
+    function finish() {
+      if (done) return;
+      done = true;
+      cleanup();
+      callback();
+    }
+
+    function handleEvent(event) {
+      if (event.target !== el) return;
+      var animName =
+        (event.animation && event.animation.animationName) || event.animationName;
+      if (animName && animName !== expectedName) return;
+      finish();
+    }
+
+    el.addEventListener("animationend", handleEvent);
+    el.addEventListener("animationcancel", handleEvent);
+    timer = setTimeout(finish, fallbackMs);
+
+    return function cancel() {
+      if (done) return;
+      done = true;
+      cleanup();
+    };
+  }
+
+  function clearShake(el) {
+    if (!el) return;
+    if (typeof el._cancelShake === "function") {
+      el._cancelShake();
+      el._cancelShake = null;
+    }
+    el.classList.remove("animate-shake");
+  }
+
+  function triggerShake(el) {
+    if (!el || prefersReducedMotion()) return;
+    clearShake(el);
+    void el.offsetWidth;
+    el.classList.add("animate-shake");
+    var cancel = onAnimationComplete(el, "ui-shake", 480, function () {
+      el.classList.remove("animate-shake");
+      el._cancelShake = null;
+    });
+    if (cancel) {
+      el._cancelShake = cancel;
+    }
+  }
+
+  function findStepPanel(target) {
     for (var i = 0; i < els.stepPanels.length; i++) {
       if (els.stepPanels[i].dataset.step === target) {
-        found = true;
-        break;
+        return els.stepPanels[i];
       }
     }
-    if (!found) return;
+    return null;
+  }
 
-    for (var j = 0; j < els.stepPanels.length; j++) {
-      els.stepPanels[j].hidden = els.stepPanels[j].dataset.step !== target;
+  function clearStepSlideClasses(panel) {
+    if (!panel) return;
+    for (var i = 0; i < STEP_SLIDE_CLASSES.length; i++) {
+      panel.classList.remove(STEP_SLIDE_CLASSES[i]);
     }
-    if (typeof window.scrollTo === "function") {
-      window.scrollTo(0, 0);
-    }
+  }
+
+  function focusStepTarget(target, options) {
     if (options && options.skipFocus) return;
     if (target === "1" && els.step1Heading) els.step1Heading.focus({ preventScroll: true });
     else if (target === "2") els.incomeDesc.focus({ preventScroll: true });
     else if (target === "3") els.expenseDesc.focus({ preventScroll: true });
     else if (target === "4" && els.step4Heading) els.step4Heading.focus({ preventScroll: true });
+  }
+
+  function cancelActiveStepTransition() {
+    if (typeof activeStepTransitionCleanup === "function") {
+      activeStepTransitionCleanup();
+      activeStepTransitionCleanup = null;
+    }
+    pendingStep = null;
+    for (var i = 0; i < els.stepPanels.length; i++) {
+      clearStepSlideClasses(els.stepPanels[i]);
+    }
+  }
+
+  function setStep(step, options) {
+    var target = String(step);
+    var targetNum = Number(target);
+    var targetPanel = findStepPanel(target);
+    if (!targetPanel || !Number.isFinite(targetNum)) return;
+
+    if (pendingStep === targetNum) return;
+    if (pendingStep === null && currentStep === targetNum) return;
+
+    if ((options && options.immediate) || currentStep === null || prefersReducedMotion()) {
+      cancelActiveStepTransition();
+      for (var j = 0; j < els.stepPanels.length; j++) {
+        els.stepPanels[j].hidden = els.stepPanels[j] !== targetPanel;
+      }
+      currentStep = targetNum;
+      if (typeof window.scrollTo === "function") {
+        window.scrollTo(0, 0);
+      }
+      focusStepTarget(target, options);
+      return;
+    }
+
+    var outgoingPanel = findStepPanel(String(currentStep));
+    if (!outgoingPanel || outgoingPanel === targetPanel) {
+      setStep(step, { immediate: true, skipFocus: options && options.skipFocus });
+      return;
+    }
+
+    cancelActiveStepTransition();
+
+    var isForward = targetNum > currentStep;
+    var exitClass = isForward ? "slide-exit-forward" : "slide-exit-backward";
+    var enterClass = isForward ? "slide-enter-forward" : "slide-enter-backward";
+    var exitAnimName = isForward ? "slideOutToLeft" : "slideOutToRight";
+    var enterAnimName = isForward ? "slideInFromRight" : "slideInFromLeft";
+
+    pendingStep = targetNum;
+    void outgoingPanel.offsetWidth;
+    outgoingPanel.classList.add(exitClass);
+
+    var cancelExit = onAnimationComplete(outgoingPanel, exitAnimName, 320, function () {
+      activeStepTransitionCleanup = null;
+      clearStepSlideClasses(outgoingPanel);
+
+      for (var k = 0; k < els.stepPanels.length; k++) {
+        els.stepPanels[k].hidden = els.stepPanels[k] !== targetPanel;
+      }
+      currentStep = targetNum;
+      pendingStep = null;
+
+      clearStepSlideClasses(targetPanel);
+      void targetPanel.offsetWidth;
+      targetPanel.classList.add(enterClass);
+
+      if (typeof window.scrollTo === "function") {
+        window.scrollTo(0, 0);
+      }
+      focusStepTarget(target, options);
+
+      var cancelEnter = onAnimationComplete(targetPanel, enterAnimName, 380, function () {
+        activeStepTransitionCleanup = null;
+        clearStepSlideClasses(targetPanel);
+      });
+      if (cancelEnter) {
+        activeStepTransitionCleanup = cancelEnter;
+      }
+    });
+
+    if (cancelExit) {
+      activeStepTransitionCleanup = cancelExit;
+    }
   }
 
   function makeId() {
@@ -94,15 +272,28 @@
   function clearErrors(pairs) {
     for (var i = 0; i < pairs.length; i++) {
       pairs[i][0].textContent = "";
-      if (pairs[i][1]) pairs[i][1].removeAttribute("aria-invalid");
+      clearShake(pairs[i][0]);
+      if (pairs[i][1]) {
+        pairs[i][1].removeAttribute("aria-invalid");
+        clearShake(pairs[i][1]);
+      }
     }
   }
 
   function showError(errEl, inputEl, message) {
     errEl.textContent = message || "";
-    if (inputEl) {
-      if (message) inputEl.setAttribute("aria-invalid", "true");
-      else inputEl.removeAttribute("aria-invalid");
+    if (message) {
+      if (inputEl) {
+        inputEl.setAttribute("aria-invalid", "true");
+        triggerShake(inputEl);
+      }
+      triggerShake(errEl);
+    } else {
+      if (inputEl) {
+        inputEl.removeAttribute("aria-invalid");
+        clearShake(inputEl);
+      }
+      clearShake(errEl);
     }
   }
 
@@ -389,6 +580,7 @@
       [els.expenseAmountErr, els.expenseAmount],
       [els.expenseTypeErr, null],
     ]);
+    clearShake(els.expenseRadioOptions);
 
     var selectedType = els.expenseForm.querySelector('input[name="tipo"]:checked');
     var tipo = selectedType ? selectedType.value : "";
@@ -401,6 +593,7 @@
       showError(els.expenseDescErr, els.expenseDesc, check.errors.description);
       showError(els.expenseAmountErr, els.expenseAmount, check.errors.amount);
       showError(els.expenseTypeErr, null, check.errors.type);
+      if (check.errors.type) triggerShake(els.expenseRadioOptions);
       if (check.errors.description) els.expenseDesc.focus();
       else if (check.errors.amount) els.expenseAmount.focus();
       return;
