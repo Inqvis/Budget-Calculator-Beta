@@ -11,6 +11,8 @@
     appMain: document.getElementById("app-main"),
     btnStart: document.getElementById("btn-start"),
     stepPanels: document.querySelectorAll(".step-panel"),
+    step1Heading: document.getElementById("step1-heading"),
+    step4Heading: document.getElementById("step4-summary-heading"),
 
     incomeForm: document.getElementById("income-form"),
     incomeDesc: document.getElementById("income-desc"),
@@ -61,7 +63,7 @@
     printDate: document.getElementById("print-date"),
   };
 
-  function setStep(step) {
+  function setStep(step, options) {
     var target = String(step);
     var found = false;
     for (var i = 0; i < els.stepPanels.length; i++) {
@@ -75,8 +77,14 @@
     for (var j = 0; j < els.stepPanels.length; j++) {
       els.stepPanels[j].hidden = els.stepPanels[j].dataset.step !== target;
     }
-    if (target === "2") els.incomeDesc.focus();
-    else if (target === "3") els.expenseDesc.focus();
+    if (typeof window.scrollTo === "function") {
+      window.scrollTo(0, 0);
+    }
+    if (options && options.skipFocus) return;
+    if (target === "1" && els.step1Heading) els.step1Heading.focus({ preventScroll: true });
+    else if (target === "2") els.incomeDesc.focus({ preventScroll: true });
+    else if (target === "3") els.expenseDesc.focus({ preventScroll: true });
+    else if (target === "4" && els.step4Heading) els.step4Heading.focus({ preventScroll: true });
   }
 
   function makeId() {
@@ -218,8 +226,9 @@
 
     function buildIncomeRow(item) {
       var tr = document.createElement("tr");
-      var tdDesc = document.createElement("td");
-      tdDesc.textContent = item.descripcion;
+      var thDesc = document.createElement("th");
+      thDesc.scope = "row";
+      thDesc.textContent = item.descripcion;
 
       var tdAmt = document.createElement("td");
       tdAmt.className = "col-amount";
@@ -229,7 +238,7 @@
       tdAct.className = "col-action no-print";
       tdAct.appendChild(createDeleteButton("ingreso", item.id, item.descripcion));
 
-      tr.appendChild(tdDesc);
+      tr.appendChild(thDesc);
       tr.appendChild(tdAmt);
       tr.appendChild(tdAct);
       return tr;
@@ -237,22 +246,28 @@
 
     function buildExpenseRow(item) {
       var tr = document.createElement("tr");
-      var tdDesc = document.createElement("td");
-      tdDesc.textContent = item.descripcion;
+      var thDesc = document.createElement("th");
+      thDesc.scope = "row";
+      thDesc.textContent = item.descripcion;
 
       var tdBadges = document.createElement("td");
+      var badgeGroup = document.createElement("span");
+      badgeGroup.className = "badge-group";
+
       var typeBadge = document.createElement("span");
       typeBadge.className =
         "badge " + (item.tipo === "fijo" ? "badge-fijo" : "badge-variable");
       typeBadge.textContent = item.tipo === "fijo" ? "Fijo" : "Variable";
-      tdBadges.appendChild(typeBadge);
+      badgeGroup.appendChild(typeBadge);
 
       if (item.es_hormiga) {
         var antBadge = document.createElement("span");
         antBadge.className = "badge badge-hormiga";
         antBadge.textContent = "Hormiga";
-        tdBadges.appendChild(antBadge);
+        badgeGroup.appendChild(antBadge);
       }
+
+      tdBadges.appendChild(badgeGroup);
 
       var tdAmt = document.createElement("td");
       tdAmt.className = "col-amount";
@@ -262,7 +277,7 @@
       tdAct.className = "col-action no-print";
       tdAct.appendChild(createDeleteButton("gasto", item.id, item.descripcion));
 
-      tr.appendChild(tdDesc);
+      tr.appendChild(thDesc);
       tr.appendChild(tdBadges);
       tr.appendChild(tdAmt);
       tr.appendChild(tdAct);
@@ -323,12 +338,22 @@
     }
   }
 
+  els.incomeDesc.addEventListener("input", function () {
+    showError(els.incomeDescErr, els.incomeDesc, "");
+  });
+
   els.incomeAmount.addEventListener("input", function () {
     formatAmountInput(els.incomeAmount);
+    showError(els.incomeAmountErr, els.incomeAmount, "");
+  });
+
+  els.expenseDesc.addEventListener("input", function () {
+    showError(els.expenseDescErr, els.expenseDesc, "");
   });
 
   els.expenseAmount.addEventListener("input", function () {
     formatAmountInput(els.expenseAmount);
+    showError(els.expenseAmountErr, els.expenseAmount, "");
   });
 
   els.incomeForm.addEventListener("submit", function (event) {
@@ -342,6 +367,8 @@
     if (!check.valid) {
       showError(els.incomeDescErr, els.incomeDesc, check.errors.description);
       showError(els.incomeAmountErr, els.incomeAmount, check.errors.amount);
+      if (check.errors.description) els.incomeDesc.focus();
+      else if (check.errors.amount) els.incomeAmount.focus();
       return;
     }
 
@@ -374,6 +401,8 @@
       showError(els.expenseDescErr, els.expenseDesc, check.errors.description);
       showError(els.expenseAmountErr, els.expenseAmount, check.errors.amount);
       showError(els.expenseTypeErr, null, check.errors.type);
+      if (check.errors.description) els.expenseDesc.focus();
+      else if (check.errors.amount) els.expenseAmount.focus();
       return;
     }
 
@@ -444,7 +473,7 @@
     window.BudgetPDF.download(state, calc.calculateBudget(state.ingresos, state.gastos));
   });
 
-  setStep(1);
+  setStep(1, { skipFocus: true });
   updatePrintDate();
   render();
 })();

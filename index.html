@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Budget Calculator — Presupuesto Mensual CLP</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -47,7 +47,7 @@
     <main class="container main-content" id="app-main">
       <section class="step-panel" data-step="1" aria-label="Inicio">
         <article class="card step-card hero-card">
-          <h2>Bienvenido a Budget Calculator</h2>
+          <h2 id="step1-heading" tabindex="-1">Bienvenido a Budget Calculator</h2>
           <p class="step-lead">
             Organiza tu presupuesto mensual en Pesos Chilenos: registra tus ingresos,
             selecciona tus categorías, revisa tus gastos y capacidad de ahorro, y descarga tu resumen en PDF.
@@ -62,8 +62,8 @@
         <div class="layout-grid">
           <div class="forms-column no-print">
             <article class="card">
-              <h2>Agregar Ingreso</h2>
-              <form id="income-form" novalidate>
+              <h2 id="income-form-title">Agregar Ingreso</h2>
+              <form id="income-form" aria-labelledby="income-form-title" novalidate>
                 <div class="field">
                   <label for="income-desc">Descripción</label>
                   <input
@@ -72,6 +72,8 @@
                     type="text"
                     maxlength="60"
                     placeholder="Ej: Sueldo líquido, Freelance, Beca"
+                    aria-describedby="income-desc-error"
+                    enterkeyhint="next"
                     required
                   />
                   <p class="field-error" id="income-desc-error" role="alert"></p>
@@ -83,7 +85,10 @@
                     name="monto"
                     type="text"
                     inputmode="numeric"
+                    autocomplete="off"
                     placeholder="Ej: 450000"
+                    aria-describedby="income-amount-error"
+                    enterkeyhint="done"
                     required
                   />
                   <p class="field-error" id="income-amount-error" role="alert"></p>
@@ -98,16 +103,16 @@
           <div class="results-column">
             <article class="card list-card">
               <div class="list-header">
-                <h2>Ingresos Registrados</h2>
+                <h2 id="step2-income-heading">Ingresos Registrados</h2>
                 <span class="list-total" id="step2-total-ingresos">$0</span>
               </div>
-              <div class="table-wrap">
-                <table>
+              <div class="table-wrap" tabindex="0" role="region" aria-labelledby="step2-income-heading">
+                <table class="table-income">
                   <thead>
                     <tr>
-                      <th>Descripción</th>
-                      <th class="col-amount">Monto</th>
-                      <th class="col-action no-print">Acción</th>
+                      <th scope="col">Descripción</th>
+                      <th scope="col" class="col-amount">Monto</th>
+                      <th scope="col" class="col-action no-print">Acción</th>
                     </tr>
                   </thead>
                   <tbody id="step2-income-list"></tbody>
@@ -137,8 +142,8 @@
             </article>
 
             <article class="card">
-              <h2>Agregar Gasto</h2>
-              <form id="expense-form" novalidate>
+              <h2 id="expense-form-title">Agregar Gasto</h2>
+              <form id="expense-form" aria-labelledby="expense-form-title" novalidate>
                 <div class="field">
                   <label for="expense-desc">Descripción</label>
                   <input
@@ -147,6 +152,8 @@
                     type="text"
                     maxlength="60"
                     placeholder="Ej: Arriendo, Internet, Café diario"
+                    aria-describedby="expense-desc-error"
+                    enterkeyhint="next"
                     required
                   />
                   <p class="field-error" id="expense-desc-error" role="alert"></p>
@@ -158,7 +165,10 @@
                     name="monto"
                     type="text"
                     inputmode="numeric"
+                    autocomplete="off"
                     placeholder="Ej: 25000"
+                    aria-describedby="expense-amount-error"
+                    enterkeyhint="done"
                     required
                   />
                   <p class="field-error" id="expense-amount-error" role="alert"></p>
@@ -196,17 +206,17 @@
           <div class="results-column">
             <article class="card list-card">
               <div class="list-header">
-                <h2>Gastos Registrados</h2>
+                <h2 id="step3-expense-heading">Gastos Registrados</h2>
                 <span class="list-total" id="step3-total-gastos">$0</span>
               </div>
-              <div class="table-wrap">
-                <table>
+              <div class="table-wrap" tabindex="0" role="region" aria-labelledby="step3-expense-heading">
+                <table class="table-expense">
                   <thead>
                     <tr>
-                      <th>Descripción</th>
-                      <th>Clasificación</th>
-                      <th class="col-amount">Monto</th>
-                      <th class="col-action no-print">Acción</th>
+                      <th scope="col">Descripción</th>
+                      <th scope="col">Clasificación</th>
+                      <th scope="col" class="col-amount">Monto</th>
+                      <th scope="col" class="col-action no-print">Acción</th>
                     </tr>
                   </thead>
                   <tbody id="step3-expense-list"></tbody>
@@ -223,6 +233,7 @@
 
       <section class="step-panel" data-step="4" aria-label="Vista de gastos, ingresos y capacidad de ahorro" hidden>
         <section class="results-column step-results" aria-label="Resumen y detalle del presupuesto">
+            <h2 id="step4-summary-heading" tabindex="-1" class="visually-hidden">Resumen de presupuesto</h2>
             <div class="summary-cards">
               <article class="card metric-card">
                 <span class="metric-label">Total Ingresos</span>
@@ -268,7 +279,7 @@
                 <div class="bar-segment bar-variables" id="bar-variables" style="width: 0%"></div>
                 <div class="bar-segment bar-saldo" id="bar-saldo" style="width: 0%"></div>
               </div>
-              <ul class="bar-legend">
+              <ul class="bar-legend" role="list">
                 <li>
                   <span class="swatch swatch-fijos"></span>
                   <span>Gastos Fijos: <strong id="legend-fijos">$0 (0%)</strong></span>
@@ -286,16 +297,16 @@
 
             <article class="card list-card">
               <div class="list-header">
-                <h2>Ingresos Registrados</h2>
+                <h2 id="step4-income-heading">Ingresos Registrados</h2>
                 <span class="list-total" id="list-total-ingresos">$0</span>
               </div>
-              <div class="table-wrap">
-                <table>
+              <div class="table-wrap" tabindex="0" role="region" aria-labelledby="step4-income-heading">
+                <table class="table-income">
                   <thead>
                     <tr>
-                      <th>Descripción</th>
-                      <th class="col-amount">Monto</th>
-                      <th class="col-action no-print">Acción</th>
+                      <th scope="col">Descripción</th>
+                      <th scope="col" class="col-amount">Monto</th>
+                      <th scope="col" class="col-action no-print">Acción</th>
                     </tr>
                   </thead>
                   <tbody id="income-list"></tbody>
@@ -305,17 +316,17 @@
 
             <article class="card list-card">
               <div class="list-header">
-                <h2>Gastos Registrados</h2>
+                <h2 id="step4-expense-heading">Gastos Registrados</h2>
                 <span class="list-total" id="list-total-gastos">$0</span>
               </div>
-              <div class="table-wrap">
-                <table>
+              <div class="table-wrap" tabindex="0" role="region" aria-labelledby="step4-expense-heading">
+                <table class="table-expense">
                   <thead>
                     <tr>
-                      <th>Descripción</th>
-                      <th>Clasificación</th>
-                      <th class="col-amount">Monto</th>
-                      <th class="col-action no-print">Acción</th>
+                      <th scope="col">Descripción</th>
+                      <th scope="col">Clasificación</th>
+                      <th scope="col" class="col-amount">Monto</th>
+                      <th scope="col" class="col-action no-print">Acción</th>
                     </tr>
                   </thead>
                   <tbody id="expense-list"></tbody>
