@@ -1,7 +1,9 @@
 (function (root) {
   "use strict";
 
-  var fmt = root.BudgetFormatters;
+  var fmt =
+    root.BudgetFormatters ||
+    (typeof require === "function" ? require("./formatters.js") : null);
 
   function formatDateFile(date) {
     var y = date.getFullYear();
@@ -20,7 +22,6 @@
     var doc = new jsPDF({ unit: "mm", format: "a4" });
     var margin = 15;
     var pageWidth = doc.internal.pageSize.getWidth();
-    var maxWidth = pageWidth - margin * 2;
     var y = 18;
 
     function ensureSpace(needed) {
@@ -31,16 +32,22 @@
     }
 
     function drawRow(leftText, midText, rightText, bold) {
-      ensureSpace(7);
       doc.setFont("helvetica", bold ? "bold" : "normal");
       doc.setFontSize(9.5);
-      var desc = doc.splitTextToSize(leftText, midText ? 88 : 135);
-      doc.text(desc[0], margin + 2, y);
+      var safeLeft = String(leftText == null ? "" : leftText);
+      var lines = doc.splitTextToSize(safeLeft, midText ? 88 : 135);
+      if (!lines || lines.length === 0) lines = [""];
+      var lineHeight = 4.5;
+      var rowHeight = Math.max(6, lines.length * lineHeight + 1.5);
+
+      ensureSpace(rowHeight);
+      doc.text(lines, margin + 2, y);
       if (midText) {
-        doc.text(midText, margin + 94, y);
+        doc.text(String(midText), margin + 94, y);
       }
-      doc.text(rightText, pageWidth - margin - 2, y, { align: "right" });
-      y += 6;
+      doc.text(String(rightText), pageWidth - margin - 2, y, { align: "right" });
+
+      y += rowHeight;
       doc.setDrawColor(210);
       doc.line(margin, y - 4, pageWidth - margin, y - 4);
     }
@@ -119,7 +126,7 @@
 
     // Tabla de Ingresos
     y += 6;
-    ensureSpace(16);
+    ensureSpace(22);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.text("Ingresos Registrados", margin, y);
@@ -135,7 +142,7 @@
 
     // Tabla de Gastos
     y += 6;
-    ensureSpace(16);
+    ensureSpace(22);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
     doc.text("Gastos Registrados", margin, y);
@@ -154,5 +161,11 @@
     doc.save("resumen-presupuesto-" + formatDateFile(now) + ".pdf");
   }
 
-  root.BudgetPDF = { download: download };
+  var api = { download: download };
+
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = api;
+  } else {
+    root.BudgetPDF = api;
+  }
 })(typeof globalThis !== "undefined" ? globalThis : window);

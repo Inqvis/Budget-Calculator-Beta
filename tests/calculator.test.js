@@ -101,6 +101,9 @@ test("validación y formateo CLP", () => {
   assert.equal(formatCLP(0), "$0");
   assert.equal(formatPercent(38.34), "38,3%");
   assert.equal(parsePositiveInt("150.000"), 150000);
+  assert.equal(parsePositiveInt("150,000"), 150000);
+  assert.equal(parsePositiveInt("1,250,000"), 1250000);
+  assert.equal(parsePositiveInt("1.250,000"), null);
   assert.equal(parsePositiveInt("0"), null);
   assert.equal(parsePositiveInt("-500"), null);
   assert.equal(parsePositiveInt("12.5"), null);
@@ -108,6 +111,39 @@ test("validación y formateo CLP", () => {
 
   assert.equal(validateEntry("A", "1000").valid, false);
   assert.equal(validateEntry("Sueldo", "0").valid, false);
+  assert.equal(validateEntry("Sueldo", "450,000").valid, true);
+  assert.equal(validateEntry("Sueldo", "450,000").amount, 450000);
   assert.equal(validateEntry("Café", "2500", { requireType: true, type: "" }).valid, false);
   assert.equal(validateEntry("Café", "2.500", { requireType: true, type: "variable" }).valid, true);
+});
+
+test("calculateBudget ignora entradas nulas, montos inválidos/negativos y tipo desconocido", () => {
+  const res = calculateBudget(
+    [
+      null,
+      undefined,
+      { descripcion: "Negativo", monto: -10000 },
+      { descripcion: "Cero", monto: 0 },
+      { descripcion: "NaN", monto: "abc" },
+      { descripcion: "Inf", monto: Infinity },
+      { descripcion: "Sueldo", monto: 100000 },
+    ],
+    [
+      null,
+      undefined,
+      { descripcion: "Negativo", monto: -5000, tipo: "fijo", es_hormiga: true },
+      { descripcion: "Tipo inválido", monto: 20000, tipo: "otro", es_hormiga: true },
+      { descripcion: "Café", monto: 10000, tipo: "variable", es_hormiga: true },
+      { descripcion: "Luz", monto: 15000, tipo: "fijo", es_hormiga: false },
+    ]
+  );
+
+  assert.equal(res.total_ingresos, 100000);
+  assert.equal(res.total_fijos, 15000);
+  assert.equal(res.total_variables, 10000);
+  assert.equal(res.total_gastos, 25000);
+  assert.equal(res.total_hormiga, 10000);
+  assert.equal(res.porcentaje_hormiga, 40);
+  assert.equal(res.balance_neto, 75000);
+  assert.equal(res.estado_presupuesto, "positivo");
 });
