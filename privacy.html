@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>Política de Privacidad — Budget Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body class="legal-page">
+    <div class="ambient-light" aria-hidden="true"></div>
+    <div class="perspective-grid" aria-hidden="true"></div>
+    <header class="site-header">
+      <div class="container header-inner">
+        <div>
+          <a class="site-brand" href="index.html">Budget Calculator</a>
+          <p class="subtitle">
+            Presupuesto mensual en Pesos Chilenos (CLP) · Guardado solo en tu navegador
+          </p>
+        </div>
+        <a class="btn btn-secondary legal-back-link" href="index.html">← Volver a la calculadora</a>
+      </div>
+    </header>
+
+    <main class="container main-content legal-main">
+      <article class="card legal-card">
+        <header class="legal-header">
+          <h1 class="legal-title">Política de Privacidad</h1>
+          <p class="legal-meta">
+            Última actualización: <time datetime="2026-11-20">20 de noviembre de 2026</time>
+          </p>
+        </header>
+
+        <div class="legal-body">
+          <section>
+            <h2>1. Responsable y alcance</h2>
+            <p>
+              Esta política describe cómo funciona <strong>Budget Calculator</strong>, una aplicación
+              web operada por <strong>Santiago Salcedo</strong>, <strong>Chile</strong>.
+            </p>
+            <p>
+              La calculadora se ejecuta íntegramente en tu navegador. No dispone de cuentas de
+              usuario, servidores propios para recibir presupuestos ni bases de datos remotas.
+            </p>
+          </section>
+
+          <section>
+            <h2>2. Datos que ingresas y almacenamiento local</h2>
+            <p>
+              La información financiera que registras en la aplicación permanece en tu dispositivo y
+              no se envía a <strong>Santiago Salcedo</strong> ni a terceros. En
+              concreto, se almacenan únicamente los siguientes datos:
+            </p>
+            <ul>
+              <li>
+                <strong>Ingresos registrados:</strong> descripción (hasta 60 caracteres) y monto en
+                Pesos Chilenos (CLP).
+              </li>
+              <li>
+                <strong>Gastos registrados:</strong> descripción (hasta 60 caracteres), monto en
+                CLP, clasificación (fijo o variable) y marca opcional de gasto hormiga.
+              </li>
+            </ul>
+            <p>
+              Estos registros se guardan de forma local mediante la API <code>localStorage</code> de
+              tu navegador bajo la clave <code>budget_calculator_data_v1</code>, con el único fin de
+              conservar tu presupuesto entre sesiones y sincronizar cambios entre pestañas abiertas
+              del mismo navegador.
+            </p>
+            <p>
+              Por seguridad, evita ingresar contraseñas, números de cédula o RUT, datos de tarjetas
+              o credenciales bancarias en los campos de descripción.
+            </p>
+          </section>
+
+          <section>
+            <h2>3. Generación de resúmenes en PDF</h2>
+            <p>
+              Cuando presionas el botón para descargar tu resumen en PDF, el documento (por ejemplo,
+              <code>resumen-presupuesto-AAAA-MM-DD.pdf</code>) se construye localmente dentro de tu
+              navegador usando la librería <code>jsPDF</code>. Ninguna cifra ni descripción se sube
+              a un servidor para generar el archivo.
+            </p>
+          </section>
+
+          <section>
+            <h2>4. Recursos técnicos de terceros</h2>
+            <p>
+              Para mostrar la tipografía del sitio y habilitar la exportación a PDF, el navegador
+              descarga dos recursos externos de terceros cuando visitas la aplicación principal:
+            </p>
+            <ul>
+              <li>
+                <strong>Google Fonts</strong> (<code>fonts.googleapis.com</code> y
+                <code>fonts.gstatic.com</code>): entrega los archivos de la fuente
+                <em>Plus Jakarta Sans</em>, configurada con
+                <code>referrerpolicy="no-referrer"</code> para no enviar la URL completa de origen.
+              </li>
+              <li>
+                <strong>jsDelivr CDN</strong> (<code>cdn.jsdelivr.net</code>): entrega el script de
+                <code>jsPDF</code> versión <code>2.5.2</code> en la calculadora, verificado mediante
+                integridad criptográfica (<code>SHA-384</code>), <code>crossorigin="anonymous"</code>
+                y <code>referrerpolicy="no-referrer"</code>.
+              </li>
+            </ul>
+            <p>
+              Al solicitar esos archivos, estos proveedores pueden recibir metadatos técnicos estándar
+              de la conexión HTTP (como tu dirección IP y encabezados básicos del navegador). El
+              sitio no utiliza herramientas de analítica web, publicidad, píxeles de seguimiento,
+              pasarelas de pago ni formularios de envío de datos personales.
+            </p>
+          </section>
+
+          <section>
+            <h2>5. Ausencia de cookies y rastreo</h2>
+            <p>
+              Budget Calculator no utiliza cookies propias ni de terceros, y no aplica técnicas de
+              perfilado, publicidad personalizada ni reconocimiento de dispositivo
+              (<em>fingerprinting</em>). El uso de <code>localStorage</code> responde exclusivamente a
+              una función técnica solicitada por ti al usar la calculadora.
+            </p>
+          </section>
+
+          <section>
+            <h2>6. Control y eliminación de tus datos</h2>
+            <p>
+              Puedes eliminar ingresos o gastos individuales en cualquier momento mediante el botón
+              <strong>Eliminar</strong> en cada tabla, o borrar por completo la clave
+              <code>budget_calculator_data_v1</code> desde la configuración de almacenamiento y datos
+              del sitio en tu navegador.
+            </p>
+           
+          </section>
+
+          <section>
+            <h2>7. Cambios en esta política</h2>
+            <p>
+              Esta política puede actualizarse si la aplicación incorpora nuevas funciones. Cada
+              versión indicará la fecha de última actualización al comienzo del documento.
+            </p>
+          </section>
+        </div>
+
+        <aside class="legal-notice" aria-label="Aviso sobre plantilla legal">
+          <p>
+            <strong>Aviso:</strong> Este documento es una plantilla base redactada conforme al
+            funcionamiento técnico actual de Budget Calculator. Completa los marcadores entre
+            corchetes y solicita la revisión de un profesional legal antes de publicar el sitio en
+            producción.
+          </p>
+        </aside>
+      </article>
+
+      <nav class="legal-nav" aria-label="Acciones de lectura">
+        <a class="btn btn-secondary" href="index.html">← Volver a la calculadora</a>
+        <a class="btn btn-secondary" href="terms.html">Ver Términos y Condiciones</a>
+      </nav>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p class="footer-copy">© 2026 Budget Calculator · Santiago Salcedo</p>
+        <nav class="footer-nav" aria-label="Información legal">
+          <ul class="footer-links">
+            <li>
+              <a class="footer-link" href="privacy.html" aria-current="page">Política de Privacidad</a>
+            </li>
+            <li>
+              <a class="footer-link" href="terms.html">Términos y Condiciones</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>

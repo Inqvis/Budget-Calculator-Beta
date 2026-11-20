@@ -3,12 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>Budget Calculator — Presupuesto Mensual CLP</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
       rel="stylesheet"
+      referrerpolicy="no-referrer"
     />
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="css/print.css" media="print" />
@@ -342,5 +344,31 @@
           </section>
       </section>
     </main>
+
+    <footer class="site-footer no-print">
+      <div class="container footer-inner">
+        <p class="footer-copy">© 2026 Budget Calculator · Santiago Salcedo</p>
+        <nav class="footer-nav" aria-label="Información legal">
+          <ul class="footer-links">
+            <li>
+              <a
+                class="footer-link"
+                href="privacy.html"
+                target="_blank"
+                rel="noopener noreferrer"
+              >Política de Privacidad<span class="visually-hidden"> (se abre en una nueva pestaña)</span></a>
+            </li>
+            <li>
+              <a
+                class="footer-link"
+                href="terms.html"
+                target="_blank"
+                rel="noopener noreferrer"
+              >Términos y Condiciones<span class="visually-hidden"> (se abre en una nueva pestaña)</span></a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </footer>
   </body>
 </html>
