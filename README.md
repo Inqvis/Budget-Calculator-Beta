@@ -1,6 +1,6 @@
 # Budget Calculator (CLP)
 
-Aplicación web estática en blanco y negro para planificar y controlar un presupuesto mensual en Pesos Chilenos (CLP). Todos los datos se guardan exclusivamente en el `localStorage` del navegador (`budget_calculator_data_v1`).
+Aplicación web estática para planificar y controlar un presupuesto mensual en Pesos Chilenos (CLP). Todos los datos se guardan exclusivamente en el `localStorage` del navegador (`budget_calculator_data_v1`).
 
 ## Uso local
 
